@@ -1,8 +1,9 @@
 package org.javaboyer.vhr.model;
 
 /**
- * http响应相关的类。status响应状态码，status响应状态码，status响应状态码。
- * 构造方法全是私有的，且ok、error方法静态，导致加载类是就会生成相应的类
+ * http响应相关的类。status响应状态码，msg响应信息，obj响应对象。
+ * 构造方法全是私有的，且ok、error方法静态，导致加载类就会生成相应的类。
+ * 利用ok、error方法构造了一个封装了响应状态码、响应信息、响应实体的类。
  *
  *
  * obj响应具体对象
@@ -27,7 +28,6 @@ public class RespBean {
     public static RespBean ok(String msg) {
         return new RespBean(200, msg, null);
     }
-
     public static RespBean ok(String msg, Object obj) {
         return new RespBean(200, msg, obj);
     }
