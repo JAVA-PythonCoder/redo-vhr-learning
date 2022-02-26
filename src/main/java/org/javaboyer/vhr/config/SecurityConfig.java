@@ -98,6 +98,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginPage("/login")
                 // 登录成功的回调
                 .successHandler(new AuthenticationSuccessHandler() {
+                    /**
+                     *
+                     * @author zhangfu.huang
+                     * @date 2022/2/26 18:28
+                     * @param req spring mvc容器的请求对象，保存前端服务请求信息
+                     * @param resp spring mvc容器的响应对象，保存后端服务响应信息
+                     * @param authentication spring security容器的认证对象，保存被认证对象信息等。Authentication身份验证对象保存在SecurityContextHolder.getContext().getAuthentication()。
+                     */
                     @Override
                     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
                         // 设置响应内容类型

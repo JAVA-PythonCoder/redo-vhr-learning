@@ -1,5 +1,14 @@
 package org.javaboyer.vhr.model;
 
+import java.util.List;
+
+/**
+ * Menu类封装前端菜单。前端根据请求接口，后端从数据库中选出前端用户该显示的菜单。
+ * url前端Url、path路由地址、component路由组件、meta路由组件是否保活和需要权限认证、children表示路由的子路由，parentId表示父菜单的id
+ *
+ * @author zhangfu.huang
+ * @date 2022/2/26 18:14
+ */
 public class Menu {
     private Integer id;
 
@@ -11,13 +20,13 @@ public class Menu {
 
     private String name;
 
-    private String iconcls;
+    private String iconCls;
 
-    private Boolean keepalive;
+    private Meta meta;
 
-    private Boolean requireauth;
+    private List<Menu> children;
 
-    private Integer parentid;
+    private Integer parentId;
 
     private Boolean enabled;
 
@@ -34,7 +43,7 @@ public class Menu {
     }
 
     public void setUrl(String url) {
-        this.url = url == null ? null : url.trim();
+        this.url = url;
     }
 
     public String getPath() {
@@ -42,7 +51,7 @@ public class Menu {
     }
 
     public void setPath(String path) {
-        this.path = path == null ? null : path.trim();
+        this.path = path;
     }
 
     public String getComponent() {
@@ -50,7 +59,7 @@ public class Menu {
     }
 
     public void setComponent(String component) {
-        this.component = component == null ? null : component.trim();
+        this.component = component;
     }
 
     public String getName() {
@@ -58,39 +67,39 @@ public class Menu {
     }
 
     public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+        this.name = name;
     }
 
-    public String getIconcls() {
-        return iconcls;
+    public String getIconCls() {
+        return iconCls;
     }
 
-    public void setIconcls(String iconcls) {
-        this.iconcls = iconcls == null ? null : iconcls.trim();
+    public void setIconCls(String iconCls) {
+        this.iconCls = iconCls;
     }
 
-    public Boolean getKeepalive() {
-        return keepalive;
+    public Meta getMeta() {
+        return meta;
     }
 
-    public void setKeepalive(Boolean keepalive) {
-        this.keepalive = keepalive;
+    public void setMeta(Meta meta) {
+        this.meta = meta;
     }
 
-    public Boolean getRequireauth() {
-        return requireauth;
+    public List<Menu> getChildren() {
+        return children;
     }
 
-    public void setRequireauth(Boolean requireauth) {
-        this.requireauth = requireauth;
+    public void setChildren(List<Menu> children) {
+        this.children = children;
     }
 
-    public Integer getParentid() {
-        return parentid;
+    public Integer getParentId() {
+        return parentId;
     }
 
-    public void setParentid(Integer parentid) {
-        this.parentid = parentid;
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 
     public Boolean getEnabled() {
