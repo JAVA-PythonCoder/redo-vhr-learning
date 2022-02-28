@@ -1,4 +1,4 @@
-package org.javaboyer.vhr.config;
+package org.javaboyer.vhr.service;
 
 import org.javaboyer.vhr.mapper.MenuMapper;
 import org.javaboyer.vhr.model.Hr;

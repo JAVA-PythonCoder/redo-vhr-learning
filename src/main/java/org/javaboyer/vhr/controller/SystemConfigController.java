@@ -1,6 +1,6 @@
 package org.javaboyer.vhr.controller;
 
-import org.javaboyer.vhr.config.MenuService;
+import org.javaboyer.vhr.service.MenuService;
 import org.javaboyer.vhr.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
