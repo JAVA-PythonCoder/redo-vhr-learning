@@ -26,7 +26,24 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
+ * SecurityConfig继承WebSecurityConfigurerAdapter用来个性化SpringSecurity的默认配置，
+ * 主要是用户登录验证相关配置和资源请求过程和响应配置
+ *
+ *
  * SecurityConfig是自定义Spring security配置类，必须扩展WebSecurityConfigurerAdapter，重写其暴露出来的方法将自定义配置注册到SpringBoot容器中
+ * SpringSecurity的简单原理：使用众多的拦截器对url拦截，以此来管理权限。其中有两个核心流程。
+ * 权限管理：登录验证（用户名和密码验证）+访问资源管理（访问Url时的用户权限验证）
+ * 登录验证拦截器：AuthenticationProcessingFilter，资源管理拦截器：AbstractSecurityInterceptor
+ * 拦截器里的实现需要一些组件实现，有AuthenticationManager、AccessDecisionManager
+ * 大体流程：用户登录会被AuthenticationProcessingFilter拦截，调用AuthenticationManager的实现，而且
+ * AuthenticationManager会调用ProviderManager来获取用户验证信息（不同的Provider调用服务不同，因为这些信息
+ * 可以在数据库上，可以是在LDAP服务器上，可以是xml配置文件上等），如果验证通过后会将用户的权限信息封装成一个
+ * User放在Spring的全局缓存SecurityContextHolder中，以备后面访问资源时使用。访问资源（即授权管理），访问url时，
+ * 会通过AbstractSecurityInterceptor拦截器拦截，其中会调用FilterInvocationSecurityMetadataSource的方法
+ * 来获取拦截url所需的全部权限，再调用授权管理器AccessDecisionManager，这个授权管理器会通过spring的全局
+ * 缓存SecurityContextHolder获取用户的权限信息，还会获取被拦截的url和被拦截url所需的全部权限，然后根据所配
+ * 策略（有：一票决定，一票否决， 少数服从多数等），如果权限足够，则返回，权限不够则报错并调用权限不足页面。
+ *
  *
  * @author zhangfu.huang
  * @date 2022年02月21日 22:52
@@ -50,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * configure用于身份验证。AuthenticationManagerBuilder的实例调用UserDetailsService的实例方法loadUserByUsername，该方法返回UserDetails实例。
+     * configure用于登录时的用户身份验证。AuthenticationManagerBuilder的实例调用UserDetailsService的实例方法loadUserByUsername，该方法返回UserDetails实例。
      * 用户认证的核心还是UserDetails实例中的方法会被spring security调用。
      *
      * @author zhangfu.huang
@@ -82,9 +99,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // 配置请求认证规则，所有的请求必须经过该认证规则才能访问服务
+        // 配置请求认证规则，所有的请求登录后经过该认证规则才能访问服务
         http.authorizeRequests()
-                // 所有请求被认证后才能访问
+                // 所有请求登录后才能访问
                 .anyRequest().authenticated()
                 .and()
                 // 基于表单登录的身份验证
