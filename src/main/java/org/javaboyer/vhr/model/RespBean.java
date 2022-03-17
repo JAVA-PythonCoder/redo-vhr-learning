@@ -1,6 +1,7 @@
 package org.javaboyer.vhr.model;
 
 /**
+ * 封装后端响应信息，并将其返回给前端
  * http响应相关的类。status响应状态码，msg响应信息，obj响应对象。
  * 构造方法全是私有的，且ok、error方法静态，导致加载类就会生成相应的类。
  * 利用ok、error方法构造了一个封装了响应状态码、响应信息、响应实体的类。

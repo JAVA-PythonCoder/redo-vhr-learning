@@ -37,9 +37,13 @@ public class HrService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Hr hr = hrMapper.loadUserByUsername(username);
+        // 查询得到的hr是否存在，如果不存在说明当前登录用户不合法，存在则对登录用户赋权限（用户拥有的角色）
         if (hr == null) {
             throw new UsernameNotFoundException("用户名不存在");
         }
+        // 用户登录成功，为用户赋权限
+        System.out.println("hr.getId() = " + hr.getId());
+        hr.setRoles(hrMapper.getHrRolesById(hr.getId()));
         return hr;
     }
 }

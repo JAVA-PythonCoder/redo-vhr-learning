@@ -1,9 +1,12 @@
 package org.javaboyer.vhr.model;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Hr类的实例用于登录服务，所以要实现该类的登录接口，需要其实现UserDetails接口里的方法实现登录控制，即Hr类的实例在登录时spring security会调用该实例方法检查登录输入信息。
@@ -31,6 +34,9 @@ public class Hr implements UserDetails {
     private String userface;
 
     private String remark;
+
+    // 存储用户拥有的角色
+    private List<Role> roles;
 
     public Integer getId() {
         return id;
@@ -72,7 +78,15 @@ public class Hr implements UserDetails {
         this.address = address == null ? null : address.trim();
     }
 
-//    public Boolean getEnabled() {
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    //    public Boolean getEnabled() {
 //        return enabled;
 //    }
 
@@ -138,9 +152,21 @@ public class Hr implements UserDetails {
         this.username = username == null ? null : username.trim();
     }
 
+    /**
+     * 方法返回授予登录用户的权限。
+     * 因为所有的接口通过登录用户的角色进行控制，所以登录用户的权限就是该用户拥有的角色集合
+     *
+     * @author zhangfu.huang
+     * @date 2022/3/8 21:12
+     * @return java.util.Collection<? extends org.springframework.security.core.GrantedAuthority>
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>(roles.size());
+        for (Role role : roles) {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+        }
+        return authorities;
     }
 
     @Override

@@ -34,7 +34,6 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
             <!--  锁定mysql驱动版本  -->
             <version>8.0.21</version>
         </dependency>

@@ -8,13 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.*;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -27,7 +31,7 @@ import java.io.PrintWriter;
 
 /**
  * SecurityConfig继承WebSecurityConfigurerAdapter用来个性化SpringSecurity的默认配置，
- * 主要是用户登录验证相关配置和资源请求过程和响应配置
+ * 主要是用户验证登录、资源请求管理和响应配置
  *
  *
  * SecurityConfig是自定义Spring security配置类，必须扩展WebSecurityConfigurerAdapter，重写其暴露出来的方法将自定义配置注册到SpringBoot容器中
@@ -35,7 +39,7 @@ import java.io.PrintWriter;
  * 权限管理：登录验证（用户名和密码验证）+访问资源管理（访问Url时的用户权限验证）
  * 登录验证拦截器：AuthenticationProcessingFilter，资源管理拦截器：AbstractSecurityInterceptor
  * 拦截器里的实现需要一些组件实现，有AuthenticationManager、AccessDecisionManager
- * 大体流程：用户登录会被AuthenticationProcessingFilter拦截，调用AuthenticationManager的实现，而且
+ * 大体流程：用户登录请求会被AuthenticationProcessingFilter拦截，调用AuthenticationManager的实现，而且
  * AuthenticationManager会调用ProviderManager来获取用户验证信息（不同的Provider调用服务不同，因为这些信息
  * 可以在数据库上，可以是在LDAP服务器上，可以是xml配置文件上等），如果验证通过后会将用户的权限信息封装成一个
  * User放在Spring的全局缓存SecurityContextHolder中，以备后面访问资源时使用。访问资源（即授权管理），访问url时，
@@ -53,6 +57,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     HrService hrService;
+    @Autowired
+    CustomFilterInvocationSecurityMetadataSource customFilterInvocationSecurityMetadataSource;
+    @Autowired
+    CustomUrlDecisionManager customUrlDecisionManager;
 
     /**
      * PasswordEncoder接口用于密码加密，BCryptPasswordEncoder是PasswordEncoder的实现
@@ -64,6 +72,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * configure(WebSecurity)定义哪些URL不受SpringSecurity保护
+     * 忽略某些请求url不受spring security保护
+     * <p>
+     * Override this method to configure {@link WebSecurity}. For example, if you wish to
+     * ignore certain requests.
+     * <p>
+     * Endpoints specified in this method will be ignored by Spring Security, meaning it
+     * will not protect them from CSRF, XSS, Clickjacking, and so on.
+     * <p>
+     * Instead, if you want to protect endpoints against common vulnerabilities, then see
+     * {@link #configure(HttpSecurity)} and the {@link HttpSecurity#authorizeRequests}
+     * configuration method.
+     *
+     * @param web
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        // SpringSecurity忽略URL匹配/login的请求
+        web.ignoring().antMatchers("/login");
     }
 
     /**
@@ -80,6 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * configure(HttpSecurity http)对http请求进行配置管理
      * configure配置用户请求认证
      *
      * Override this method to configure the {@link HttpSecurity}. Typically subclasses
@@ -102,7 +133,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 配置请求认证规则，所有的请求登录后经过该认证规则才能访问服务
         http.authorizeRequests()
                 // 所有请求登录后才能访问
-                .anyRequest().authenticated()
+                //.anyRequest().authenticated()
+                //withObjectPostProcessor()添加请求对象处理器
+                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+                    /**
+                     * Initialize the object possibly returning a modified instance that should be used
+                     * instead.
+                     *
+                     * @param object the object to initialize
+                     * @return the initialized version of the object
+                     */
+                    @Override
+                    public <O extends FilterSecurityInterceptor> O postProcess(O object) {
+                        // 每个请求对象配置请求后置处理，为每个请求对象添加资源管理相关的授权管理和安全介质资源
+                        object.setAccessDecisionManager(customUrlDecisionManager);
+                        object.setSecurityMetadataSource(customFilterInvocationSecurityMetadataSource);
+                        return object;
+                    }
+                })
                 .and()
                 // 基于表单登录的身份验证
                 .formLogin()
@@ -186,6 +234,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 // postman测试相关
-                .csrf().disable();
+                .csrf().disable().exceptionHandling()
+                // 请求或登录异常处理，当未登录访问接口不再重定向到/login
+                .authenticationEntryPoint(new AuthenticationEntryPoint() {
+                    @Override
+                    public void commence(HttpServletRequest req, HttpServletResponse resp, AuthenticationException authException) throws IOException, ServletException {
+                        resp.setContentType("application/json; charset=UTF-8");
+                        PrintWriter out = resp.getWriter();
+                        RespBean respBean = RespBean.error("访问失败");
+                        // 用户权限不够异常
+                        if (authException instanceof InsufficientAuthenticationException) {
+                            respBean.setMsg("请求失败，请联系管理员");
+                        }
+                        out.write(new ObjectMapper().writeValueAsString(respBean));
+                        out.flush();
+                        out.close();
+                    }
+                });
     }
 }

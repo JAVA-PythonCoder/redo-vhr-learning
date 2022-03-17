@@ -8,6 +8,7 @@ import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.Collection;
@@ -15,14 +16,15 @@ import java.util.List;
 
 /**
  * 用户登录成功后，访问资源会被AbstractSecurityInterceptor拦截，调用FilterInvocationSecurityMetadataSource中的方法
- * 拦截url并进行预处理返回该url对应的ConfigAttribute集合对象，再调用授权管理器AccessDecisionManager的方法根据ConfigAttribute和Spring全局缓存SecurityContextHolder获取用户权限，
+ * 拦截url并进行预处理返回该url（请求对象）对应的ConfigAttribute（关联的配置属性集合）集合对象，再调用授权管理器AccessDecisionManager的方法根据ConfigAttribute和Spring全局缓存SecurityContextHolder获取用户权限，
  * 或根据所配策略验证信息。
  *
  *
  * @author zhangfu.huang
  * @date 2022年03月08日 9:34
  */
-public class MyFilter implements FilterInvocationSecurityMetadataSource {
+@Component
+public class CustomFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
     @Autowired
     MenuService menuService;
@@ -54,10 +56,11 @@ public class MyFilter implements FilterInvocationSecurityMetadataSource {
                 for (int i = 0; i < roles.size(); i++) {
                     roleStr[i] = roles.get(i).getName();
                 }
+                // SecurityConfig.createList创建安全对象（object即请求对象）的配置属性ConfigAttributes集合
                 return SecurityConfig.createList(roleStr);
             }
         }
-        // 对于没有匹配的url，也返回ConfigAttribute集合，但标记了“ROLE_LOGIN”自定义统一表示用户没登录
+        // 对于没有匹配的url，也返回ConfigAttribute集合，但标记了“ROLE_LOGIN”自定义统一表示用户没登录和请求的url不合法，交给AccessDecisionManager处理
         return SecurityConfig.createList("ROLE_LOGIN");
     }
 

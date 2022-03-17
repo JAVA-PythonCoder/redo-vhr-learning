@@ -28,7 +28,10 @@
     from hr
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    <select id="getHrRolesById" resultType="org.javaboyer.vhr.model.Role" parameterType="integer">
+      SELECT r.* FROM `role` r, hr_role hrr WHERE hrr.rid = r.id AND hrr.hrid = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from hr
     where id = #{id,jdbcType=INTEGER}
   </delete>

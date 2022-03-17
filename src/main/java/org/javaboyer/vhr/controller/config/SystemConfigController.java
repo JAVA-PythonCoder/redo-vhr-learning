@@ -1,4 +1,4 @@
-package org.javaboyer.vhr.controller;
+package org.javaboyer.vhr.controller.config;
 
 import org.javaboyer.vhr.service.MenuService;
 import org.javaboyer.vhr.model.Menu;
