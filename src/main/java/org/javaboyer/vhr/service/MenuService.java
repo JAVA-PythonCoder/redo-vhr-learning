@@ -47,4 +47,8 @@ public class MenuService {
     public List<Menu> getAllMenuWithRole() {
         return menuMapper.getAllMenuWithRole();
     }
+
+    public List<Menu> getAllMenus() {
+        return menuMapper.getAllMenus();
+    }
 }

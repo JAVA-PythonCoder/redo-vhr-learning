@@ -43,6 +43,14 @@ public class PositionController {
         return RespBean.error("更新失败");
     }
 
+    /**
+     * -@PathVariable表示从url中获取值，url必须为/value1/value2形式
+     *
+     * @author zhangfu.huang
+     * @date 2022/3/17 9:02
+     * @param id
+     * @return org.javaboyer.vhr.model.RespBean
+     */
     @DeleteMapping("/{id}")
     public RespBean deletePositionById(@PathVariable Integer id) {
         if (positionService.deletePositionById(id) == 1) {
@@ -51,6 +59,15 @@ public class PositionController {
         return RespBean.error("删除失败");
     }
 
+    /**
+     * 前端向后端传值，一般是JSON数据。
+     * 也可用key/value形式，即url形如/?key1=value1&key2=value2...
+     *
+     * @author zhangfu.huang
+     * @date 2022/3/17 9:03
+     * @param ids
+     * @return org.javaboyer.vhr.model.RespBean
+     */
     @DeleteMapping("/")
     public RespBean deletePositionsByIds(Integer[] ids) {
         if (positionService.deletePositionsByIds(ids) == ids.length) {

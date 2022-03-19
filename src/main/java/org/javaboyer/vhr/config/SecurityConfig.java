@@ -22,6 +22,7 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -160,7 +161,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 验证用户登录的URL，本例是验证用户名和密码
                 .loginProcessingUrl("/doLogin")
                 // 指定登录页面。当有没经过登录页面和登录验证页面的请求都会被拦截后端跳转到/login页面
-                .loginPage("/login")
+                //.loginPage("/login")
                 // 登录成功的回调
                 .successHandler(new AuthenticationSuccessHandler() {
                     /**
@@ -244,7 +245,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         RespBean respBean = RespBean.error("访问失败");
                         // 用户权限不够异常
                         if (authException instanceof InsufficientAuthenticationException) {
-                            respBean.setMsg("请求失败，请联系管理员");
+                            respBean.setMsg("请求权限不足，请联系管理员");
+                        } else if (authException instanceof SessionAuthenticationException) {
+                            resp.setStatus(401);
+                            respBean.setMsg("为登录，请登录");
                         }
                         out.write(new ObjectMapper().writeValueAsString(respBean));
                         out.flush();

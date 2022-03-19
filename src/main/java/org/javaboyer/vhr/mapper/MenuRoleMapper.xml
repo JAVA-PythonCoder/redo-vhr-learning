@@ -15,9 +15,17 @@
     from menu_role
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    <select id="selectMidsByRid" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+      SELECT MID FROM menu_role WHERE rid = #{rid,jdbcType=INTEGER};
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from menu_role
     where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByRid" parameterType="integer">
+    delete
+    from menu_role
+    where rid = #{rid,jdbcType=INTEGER};
   </delete>
   <insert id="insert" parameterType="org.javaboyer.vhr.model.MenuRole" >
     insert into menu_role (id, mid, rid)
@@ -47,6 +55,13 @@
         #{rid,jdbcType=INTEGER},
       </if>
     </trim>
+  </insert>
+  <insert id="insertRecords">
+    insert into menu_role(mid, rid)
+    values
+    <foreach collection="mids" separator="," item="mid">
+      (#{mid,jdbcType=INTEGER}, #{rid,jdbcType=INTEGER})
+    </foreach>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="org.javaboyer.vhr.model.MenuRole" >
     update menu_role
