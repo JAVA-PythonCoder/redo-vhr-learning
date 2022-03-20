@@ -22,4 +22,16 @@ public class DepartmentService {
         return departmentMapper.getAllDepartmentsByPid(-1);
 
     }
+
+    public Integer addDept(Department dept) {
+        // 对于增加的部门默认设置启用
+        dept.setEnabled(true);
+        departmentMapper.addDept(dept);
+        return dept.getResult();
+
+    }
+
+    public void deleteDept(Department dept) {
+        departmentMapper.deleteDept(dept);
+    }
 }

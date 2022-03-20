@@ -40,6 +40,9 @@
     delete from department
     where id = #{id,jdbcType=INTEGER}
   </delete>
+  <select id="deleteDept" statementType="CALLABLE">
+    call deleteDep(#{id,jdbcType=INTEGER,mode=IN}, #{result,jdbcType=INTEGER,mode=OUT})
+  </select>
   <insert id="insert" parameterType="org.javaboyer.vhr.model.Department" >
     insert into department (id, name, parentId, 
       depPath, enabled, isParent)
@@ -89,6 +92,31 @@
       </if>
     </trim>
   </insert>
+  <!-- 调用数据库的存储过程，必须指定statementType为CALLABLE，其值有STATEMENT，PREPARED 和 CALLABLE，默认PREPARED。
+        存储过程执行下面的查询并返回两个结果集。第一个结果集会返回博客（Blog）的结果，第二个则返回作者（Author）的结果。
+        SELECT * FROM BLOG WHERE ID = #{id}
+        SELECT * FROM AUTHOR WHERE ID = #{id}
+        在映射语句中，必须通过 resultSets 属性为每个结果集指定一个名字，多个名字使用逗号隔开。
+        <select id="selectBlog" resultSets="blogs,authors" resultMap="blogResult" statementType="CALLABLE">
+          {call getBlogsAndAuthors(#{id,jdbcType=INTEGER,mode=IN})}
+        </select>
+        然后定义resultMap
+        <resultMap id="blogResult" type="Blog">
+          <id property="id" column="id" />
+          <result property="title" column="title"/>
+          <association property="author" javaType="Author" resultSet="authors" column="author_id" foreignColumn="id">
+            <id property="id" column="id"/>
+            <result property="username" column="username"/>
+            <result property="password" column="password"/>
+            <result property="email" column="email"/>
+            <result property="bio" column="bio"/>
+          </association>
+        </resultMap>
+        本例中调用存储过程，必须为每个入参和出参指定mode，同时如果没有查询结果集返回，对于OUT类型数据可用映射的参数接收，如result、id接收到存储过程OUT结果并赋值回原对象
+   -->
+  <select id="addDept" statementType="CALLABLE">
+    call addDep(#{name,jdbcType=VARCHAR,mode=IN}, #{parentId,jdbcType=INTEGER,mode=IN}, #{enabled,jdbcType=BOOLEAN,mode=IN}, #{result,jdbcType=INTEGER,mode=OUT}, #{id,jdbcType=INTEGER,mode=OUT})
+  </select>
   <update id="updateByPrimaryKeySelective" parameterType="org.javaboyer.vhr.model.Department" >
     update department
     <set >
