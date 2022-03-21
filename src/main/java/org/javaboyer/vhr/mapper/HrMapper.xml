@@ -28,10 +28,38 @@
     from hr
     where id = #{id,jdbcType=INTEGER}
   </select>
-    <select id="getHrRolesById" resultType="org.javaboyer.vhr.model.Role" parameterType="integer">
-      SELECT r.* FROM `role` r, hr_role hrr WHERE hrr.rid = r.id AND hrr.hrid = #{id,jdbcType=INTEGER}
-    </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+  <select id="getHrRolesById" resultType="org.javaboyer.vhr.model.Role" parameterType="integer">
+    SELECT r.* FROM `role` r, hr_role hrr WHERE hrr.rid = r.id AND hrr.hrid = #{id,jdbcType=INTEGER}
+  </select>
+  <resultMap id="ResultMapperForHrs" type="org.javaboyer.vhr.model.Hr" extends="BaseResultMap">
+    <collection property="roles" ofType="org.javaboyer.vhr.model.Role">
+      <id column="rid" property="id"/>
+      <result column="rname" property="name"/>
+      <result column="rnameZh" property="nameZh"/>
+    </collection>
+  </resultMap>
+  <select id="getAllHrs" resultMap="ResultMapperForHrs" parameterType="integer">
+    SELECT hr.id,
+           hr.name,
+           hr.phone,
+           hr.telephone,
+           hr.address,
+           hr.enabled,
+           hr.username,
+           hr.userface,
+           hr.remark,
+           r.id     AS rid,
+           r.name   AS rname,
+           r.nameZh AS rnameZh
+    FROM hr
+           LEFT JOIN hr_role hrr ON hr.id = hrr.hrid
+           LEFT JOIN `role` r ON hrr.rid = r.id
+    where hr.id != #{id};
+  </select>
+  <select id="getHrRoles" resultType="org.javaboyer.vhr.model.Role">
+    SELECT role.* FROM hr_role hrr, `role` WHERE hrr.rid = role.id AND hrr.hrid = #{hrId};
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from hr
     where id = #{id,jdbcType=INTEGER}
   </delete>

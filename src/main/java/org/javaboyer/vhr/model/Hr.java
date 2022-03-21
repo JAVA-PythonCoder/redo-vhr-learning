@@ -1,5 +1,6 @@
 package org.javaboyer.vhr.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import java.util.List;
 
 /**
  * Hr类的实例用于登录服务，所以要实现该类的登录接口，需要其实现UserDetails接口里的方法实现登录控制，即Hr类的实例在登录时spring security会调用该实例方法检查登录输入信息。
+ * 因为Hr类实现了UserDetails所以在登录验证时被UserDetailsService相关方法处理返回给前端的是一个代理对象，多了一些UserDetails中提供的属性。
  *
  * @author zhangfu.huang
  * @date 2022/2/21 22:25
@@ -100,7 +102,8 @@ public class Hr implements UserDetails {
     }
 
     /**
-     * isAccountNonExpired用于判断账户是否没有过期
+     * isAccountNonExpired用于判断账户是否没有过期。
+     * 在后端登录验证时会被调用，同时返回去的用户增加了accountNonExpired属性，说明返回的实例是代理的。
      *
      * @author zhangfu.huang
      * @date 2022/2/21 22:30
@@ -112,7 +115,8 @@ public class Hr implements UserDetails {
     }
 
     /**
-     * isAccountNonLocked用于判断账户是否没有被锁定
+     * isAccountNonLocked用于判断账户是否没有被锁定。
+     * 在后端登录验证时会被调用，同时返回去的用户增加了accountNonLocked属性，说明返回的实例是代理的。
      *
      * @author zhangfu.huang
      * @date 2022/2/21 22:30
@@ -124,7 +128,8 @@ public class Hr implements UserDetails {
     }
 
     /**
-     * isCredentialsNonExpired判断密码是否没有过期
+     * isCredentialsNonExpired判断密码是否没有过期。
+     * 在后端登录验证时会被调用，同时返回去的用户增加了accountNonExpired属性，说明返回的实例是代理的。
      *
      * @author zhangfu.huang
      * @date 2022/2/21 22:31
@@ -136,7 +141,8 @@ public class Hr implements UserDetails {
     }
 
     /**
-     * isEnabled判断用户是否启用还是禁用
+     * isEnabled判断用户是否启用还是禁用。
+     * 在后端登录验证时会被调用，同时返回去的用户增加了enabled属性，说明返回的实例是代理的。
      *
      * @author zhangfu.huang
      * @date 2022/2/21 22:33
@@ -154,13 +160,16 @@ public class Hr implements UserDetails {
 
     /**
      * 方法返回授予登录用户的权限。
-     * 因为所有的接口通过登录用户的角色进行控制，所以登录用户的权限就是该用户拥有的角色集合
+     * 因为所有的接口通过登录用户的角色进行控制，所以登录用户的权限就是该用户拥有的角色集合。
+     * 在后端登录验证时会被调用，同时返回去的用户增加了authorities属性，说明返回的实例是代理的。
+     * authorities属性只在后端验证权限时有用，前端不用，所以不需要对其JSON序列化、反序列化
      *
      * @author zhangfu.huang
      * @date 2022/3/8 21:12
      * @return java.util.Collection<? extends org.springframework.security.core.GrantedAuthority>
      */
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>(roles.size());
         for (Role role : roles) {

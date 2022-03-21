@@ -19,6 +19,11 @@
     delete from hr_role
     where id = #{id,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteByHrId" parameterType="integer">
+    delete
+    from hr_role
+    where hrid = #{hrId};
+  </delete>
   <insert id="insert" parameterType="org.javaboyer.vhr.model.HrRole" >
     insert into hr_role (id, hrid, rid
       )
@@ -49,6 +54,12 @@
         #{rid,jdbcType=INTEGER},
       </if>
     </trim>
+  </insert>
+  <insert id="insertHrWithRoles">
+    insert into hr_role(hrid, rid) values
+    <foreach collection="roleIds" item="id" separator=",">
+      (#{hrId,jdbcType=INTEGER}, #{id,jdbcType=INTEGER})
+    </foreach>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="org.javaboyer.vhr.model.HrRole" >
     update hr_role

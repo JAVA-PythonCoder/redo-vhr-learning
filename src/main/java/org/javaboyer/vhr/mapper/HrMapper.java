@@ -21,4 +21,8 @@ public interface HrMapper {
     Hr loadUserByUsername(String username);
 
     List<Role> getHrRolesById(Integer id);
+
+    List<Hr> getAllHrs(Integer id);
+
+    List<Role> getHrRoles(Integer hrId);
 }

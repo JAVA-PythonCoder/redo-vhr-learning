@@ -1,5 +1,6 @@
 package org.javaboyer.vhr.mapper;
 
+import org.apache.ibatis.annotations.Param;
 import org.javaboyer.vhr.model.HrRole;
 
 import java.util.List;
@@ -17,4 +18,7 @@ public interface HrRoleMapper {
 
     int updateByPrimaryKey(HrRole record);
 
+    void deleteByHrId(Integer hrId);
+
+    Integer insertHrWithRoles(@Param("hrId") Integer hrId, @Param("roleIds") Integer[] roleIds);
 }
