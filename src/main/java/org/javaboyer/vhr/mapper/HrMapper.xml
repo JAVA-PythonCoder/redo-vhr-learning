@@ -40,21 +40,24 @@
   </resultMap>
   <select id="getAllHrs" resultMap="ResultMapperForHrs" parameterType="integer">
     SELECT hr.id,
-           hr.name,
-           hr.phone,
-           hr.telephone,
-           hr.address,
-           hr.enabled,
-           hr.username,
-           hr.userface,
-           hr.remark,
-           r.id     AS rid,
-           r.name   AS rname,
-           r.nameZh AS rnameZh
+    hr.name,
+    hr.phone,
+    hr.telephone,
+    hr.address,
+    hr.enabled,
+    hr.username,
+    hr.userface,
+    hr.remark,
+    r.id AS rid,
+    r.name AS rname,
+    r.nameZh AS rnameZh
     FROM hr
-           LEFT JOIN hr_role hrr ON hr.id = hrr.hrid
-           LEFT JOIN `role` r ON hrr.rid = r.id
-    where hr.id != #{id};
+    LEFT JOIN hr_role hrr ON hr.id = hrr.hrid
+    LEFT JOIN `role` r ON hrr.rid = r.id
+    where hr.id != #{id}
+    <if test="keywords != null">
+      and hr.name like concat('%', #{keywords}, '%');
+    </if>
   </select>
   <select id="getHrRoles" resultType="org.javaboyer.vhr.model.Role">
     SELECT role.* FROM hr_role hrr, `role` WHERE hrr.rid = role.id AND hrr.hrid = #{hrId};

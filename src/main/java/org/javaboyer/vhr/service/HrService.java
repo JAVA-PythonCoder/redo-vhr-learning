@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -55,10 +57,10 @@ public class HrService implements UserDetailsService {
         return hr;
     }
 
-    public List<Hr> getAllHrs() {
+    public List<Hr> getAllHrs(String keywords) {
         // 将当前登录用户（管理员）外的所有用户的角色查询出来
         Hr hr = HrInstanceUtil.getHrInstance();
-        return hrMapper.getAllHrs(hr.getId());
+        return hrMapper.getAllHrs(hr.getId(), keywords);
 
     }
 
@@ -66,7 +68,7 @@ public class HrService implements UserDetailsService {
         return hrMapper.updateByPrimaryKeySelective(hr);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {}, timeout = -1)
     public boolean updateHrWithRoles(Integer hrId, Integer[] roleIds) {
         hrRoleMapper.deleteByHrId(hrId);
         return hrRoleMapper.insertHrWithRoles(hrId, roleIds) == roleIds.length;
@@ -74,5 +76,11 @@ public class HrService implements UserDetailsService {
 
     public List<Role> getHrRoles(Integer hrId) {
         return hrMapper.getHrRoles(hrId);
+    }
+
+    @Transactional
+    public Integer delHrWithId(Integer id) {
+        hrRoleMapper.deleteByHrId(id);
+        return hrMapper.deleteByPrimaryKey(id);
     }
 }

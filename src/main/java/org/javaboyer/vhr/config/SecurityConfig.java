@@ -248,7 +248,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                             respBean.setMsg("请求权限不足，请联系管理员");
                         } else if (authException instanceof SessionAuthenticationException) {
                             resp.setStatus(401);
-                            respBean.setMsg("为登录，请登录");
+                            respBean.setMsg("未登录，请登录");
                         }
                         out.write(new ObjectMapper().writeValueAsString(respBean));
                         out.flush();
